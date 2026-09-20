@@ -44,6 +44,11 @@ def identity(name, pid):
                 "pid": pid,
                 "created": process.create_time(),
                 "command": process.cmdline(),
+                **(
+                    {"settings": config.settings().environment()}
+                    if name == "supervisor"
+                    else {}
+                ),
                 **token(pid),
             }
         )
@@ -85,6 +90,7 @@ def stop_tree(process, timeout):
 
 
 def main():
+    config.settings()
     for path in (
         config.RUN,
         config.LOGS,

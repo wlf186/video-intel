@@ -3,22 +3,41 @@
 import os
 from pathlib import Path
 
+from .settings import load_settings
+
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data"
 TMP = ROOT / "tmp"
 CACHE = ROOT / "cache"
 LOGS = ROOT / "logs"
 RUN = ROOT / "run"
-HOST = os.environ.get("VIDEO_INTEL_HOST", "0.0.0.0")
-PORT = int(os.environ.get("VIDEO_INTEL_PORT", "20820"))
-BACKEND_PORT = int(os.environ.get("VIDEO_INTEL_BACKEND_PORT", "8188"))
-MIN_FREE_BYTES = int(os.environ.get("VIDEO_INTEL_MIN_FREE_BYTES", str(5 * 1024**3)))
 CHECKPOINT_SECONDS = 60
 VERSION = "1.0.1"
+_settings = None
+
+
+def settings():
+    global _settings
+    if _settings is None:
+        _settings = load_settings(ROOT)
+    return _settings
+
+
+def configure(value):
+    global _settings
+    _settings = value
+
+
+def __getattr__(name):
+    # Management commands must work even when the next-start config is invalid.
+    if name in {"HOST", "PORT", "BACKEND_PORT", "MIN_FREE_BYTES"}:
+        return getattr(settings(), name.lower())
+    raise AttributeError(name)
 
 
 def runtime_environment():
     env = dict(os.environ)
+    env.update(settings().environment())
     paths = {
         "TMPDIR": TMP / "runtime",
         "TMP": TMP / "runtime",

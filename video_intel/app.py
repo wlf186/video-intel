@@ -41,6 +41,7 @@ from .workflows import DEFAULT_PRESET, PRESETS, duration_frames
 
 os.environ.setdefault("HF_HUB_OFFLINE", "1")
 os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+config.settings()  # Validate deployment settings before initializing storage.
 service = JobService()
 storage = Storage(service)
 

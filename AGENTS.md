@@ -36,7 +36,7 @@ Use concise imperative commit subjects. PRs should explain behavior changes, lin
 
 ## Security & Configuration
 
-The service has no authentication; keep deployment within trusted networks. Configure listening addresses through `VIDEO_INTEL_HOST`, `VIDEO_INTEL_PORT`, and `VIDEO_INTEL_BACKEND_PORT`. Keep model weights, generated media, databases, and environments out of commits.
+The service has no authentication; keep deployment within trusted networks. Configure listening addresses in the root `.env` (copy `.env.example`) through `VIDEO_INTEL_HOST`, `VIDEO_INTEL_PORT`, and `VIDEO_INTEL_BACKEND_PORT`; external environment variables take precedence. Restart to apply file changes; `service.sh status` reports the actual running endpoint and pending configuration. Keep local `.env`, model weights, generated media, databases, and environments out of commits.
 
 ## Dependencies and releases
 

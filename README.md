@@ -19,6 +19,40 @@
 服务监听 `0.0.0.0:20820`；从其他机器访问时，把 localhost 换成本机 IP。
 ComfyUI 后端仅监听 `127.0.0.1:8188`。已有的 20810、20815 服务独立运行。
 
+### 修改监听配置
+
+首次配置时复制模板（已有 `.env` 时保留原文件）：
+
+```bash
+cp -n .env.example .env
+```
+
+编辑项目根目录的 `.env`，例如将网页/API 端口改为 20821：
+
+```dotenv
+VIDEO_INTEL_HOST=0.0.0.0
+VIDEO_INTEL_PORT=20821
+VIDEO_INTEL_BACKEND_PORT=8188
+VIDEO_INTEL_MIN_FREE_BYTES=5368709120
+```
+
+保存后执行 `./service.sh restart`，即可访问 `http://localhost:20821`。
+没有 `.env` 时仍采用 `0.0.0.0:20820`；ComfyUI 始终只绑定 loopback。
+配置优先级为 **外部环境变量 > 项目 `.env` > 内置默认值**，例如
+`VIDEO_INTEL_PORT=20822 ./service.sh restart` 可临时覆盖文件。端口范围为 1–65535，
+API 与后端端口不能相同；最低可用空间以字节计，允许 0。
+
+`.env` 支持 `KEY=value`、可选的 `export`、注释和包围值的引号；不会执行 Shell 或
+展开变量，仅加载上述四项设置。文件始终按项目根目录定位，与调用时所在目录无关。
+`.env` 不进入 Git，`.env.example` 是可共享的默认模板。自动化测试可通过外部环境变量
+`VIDEO_INTEL_LOAD_ENV=0` 跳过文件；不要将该开关写进 `.env`。
+
+运行期间修改文件不会立即改变监听端口。`./service.sh status` 显示当前实际 `endpoint`、
+下一次启动的 `configured_endpoint`，以及是否需要重启的 `restart_required`。
+配置无效时显示 `configuration_error`，但仍可查询或停止已有进程。`restart` 会先校验
+配置再停止服务；端口占用等启动时错误仍需检查日志。子进程及其自动重启使用启动时的
+配置快照，修改文件后需要显式重启整个服务。
+
 ### 生成模式
 
 | 模式 | 附图 | 用途 |
