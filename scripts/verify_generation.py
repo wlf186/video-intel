@@ -32,14 +32,17 @@ def main():
     parser.add_argument(
         "--manifest", type=pathlib.Path, default=DIRECTORY / "results.json"
     )
+    parser.add_argument("--base-url", default="http://127.0.0.1:20820")
+    parser.add_argument("--reference-image", type=pathlib.Path, default=DIRECTORY / "reference.png")
     args = parser.parse_args()
     DIRECTORY.mkdir(parents=True, exist_ok=True)
     manifest = args.manifest
     manifest.parent.mkdir(parents=True, exist_ok=True)
     results = json.loads(manifest.read_text()) if manifest.exists() else {}
-    image_path = DIRECTORY / "reference.png"
+    image_path = args.reference_image
+    image_path.parent.mkdir(parents=True, exist_ok=True)
     with httpx.Client(
-        base_url="http://127.0.0.1:20820", timeout=30, trust_env=False
+        base_url=args.base_url, timeout=30, trust_env=False
     ) as client:
         for preset in args.presets:
             for mode in args.modes:

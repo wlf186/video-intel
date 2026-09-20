@@ -14,11 +14,11 @@ Sandevistan Video runs local MiniMax H3 video/audio generation through ComfyUI.
 
 Run commands from the repository root.
 
-- `./scripts/setup.sh`: install dependencies, download approximately 64 GB of models, and build the frontend. Requires uv, ffmpeg, npm, and Node.js 22.12+; provisions Python 3.12.
+- `./scripts/setup.sh`: install dependencies, download approximately 64 GB of models, and build the frontend. Requires system Python 3.9+, Git, ffmpeg, and Node.js 22.12+; bootstraps checksum-pinned uv/pnpm and provisions Python 3.12.14. Use `--skip-models` for dependency-only maintenance.
 - `./service.sh start`: launch the supervised API and inference backend. Use `status`, `logs`, `restart`, or `stop` for lifecycle operations. The app serves on port 20820.
-- `npm --prefix frontend ci`: install locked frontend dependencies.
-- `npm --prefix frontend run dev`: start the Vite development server.
-- `npm --prefix frontend run build`: type-check and create the production bundle.
+- `./scripts/pnpm.sh install --frozen-lockfile`: install locked frontend dependencies.
+- `./scripts/pnpm.sh dev`: start the Vite development server.
+- `./scripts/pnpm.sh build`: type-check and create the production bundle.
 - `.venv/bin/python -m pytest tests -q`: run backend tests.
 - `.venv/bin/ruff check video_intel tests scripts`: lint Python code.
 
@@ -32,8 +32,14 @@ Name pytest files `test_*.py` and functions `test_*`. Use `tmp_path`, monkeypatc
 
 ## Commit & Pull Request Guidelines
 
-This checkout lacks Git history, so no established commit convention can be verified. Use concise imperative subjects. PRs should explain behavior changes, link relevant issues, report validation commands/results, and include screenshots for UI changes.
+Use concise imperative commit subjects. PRs should explain behavior changes, link relevant issues, report validation commands/results, and include screenshots for UI changes.
 
 ## Security & Configuration
 
 The service has no authentication; keep deployment within trusted networks. Configure listening addresses through `VIDEO_INTEL_HOST`, `VIDEO_INTEL_PORT`, and `VIDEO_INTEL_BACKEND_PORT`. Keep model weights, generated media, databases, and environments out of commits.
+
+## Dependencies and releases
+
+Follow [dependency maintenance and release gates](docs/DEPENDENCIES.md). Maintain direct Python inputs and generated hashed full/CI locks together; run `python3 scripts/lock_dependencies.py --check` and `.venv/bin/python scripts/audit_dependencies.py`. Never silently install without a lock. Keep pnpm and its lockfile as the sole frontend package-manager contract. Preserve the validated ComfyUI/Torch/CUDA/model identities unless explicitly changing inference. Security exceptions require version-bound, time-bounded evidence and must not hide skipped audits.
+
+Before runtime edits or dependency synchronization, record the normal service configuration and process identities, wait for active jobs, and stop it. Restore originally running services after validation and verify fresh processes, health/version and historical data. Read-only work does not authorize restarts. Releases require exact-commit main and tag CI success; publish immutable tags and report local deployment separately.

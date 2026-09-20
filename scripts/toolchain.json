@@ -1,0 +1,10 @@
+{
+  "python": "3.12.14",
+  "node": "24.21.0",
+  "uv": "0.12.5",
+  "uv_sha256": "68a509da24b06b4223a1c0175fb5eb5bc79342b76cbeff0cfe51ac3f5b17b6b2",
+  "pnpm": "10.34.5",
+  "pnpm_sha512": "pO4F8vc2WCVb1qiYWcBlpFwopX2u+uLIk6Fo7itzFow3uR6D5X6mdlStA/AwMXRkMOi84442LgQmBfuKvIAZLg==",
+  "pip-audit": "2.10.1",
+  "comfyui_commit": "40c4fcdf513a4523e39d54a9d391908af8df8171"
+}

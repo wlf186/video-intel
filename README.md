@@ -2,6 +2,8 @@
 
 完全本地运行的 MiniMax H3 音画生成服务，提供中英文 Cyberpunk 风格网页和 HTTP API。适用于可信本机或局域网；当前没有账号认证，不应直接暴露到公网。
 
+依赖锁、漏洞审计、CI 和升级发布流程见 [依赖管理](docs/DEPENDENCIES.md)。
+
 ## 使用
 
 ```bash
@@ -130,7 +132,7 @@ curl -s http://localhost:20820/api/jobs \
 
 `service.sh` 使用独立监督进程、单实例文件锁和 PID 身份校验；同时监管 API 和推理后端。异常退出后递增延时重启，连续五次失败停止；稳定运行五分钟后重置失败计数。支持前台 `./service.sh run` 供外部进程管理器使用。
 
-首次安装需要 Node.js 22.12+、npm、uv、ffmpeg；前端构建后运行不需要 Node.js。原任务库自动备份迁移，独立验证产物的 metadata 会导入任务库。环境变量 `VIDEO_INTEL_HOST`、`VIDEO_INTEL_PORT`、`VIDEO_INTEL_BACKEND_PORT` 可覆盖监听配置；`VIDEO_INTEL_MIN_FREE_BYTES` 默认 5GiB，低于阈值拒绝新任务。
+首次安装需要系统 Python 3.9+、Git、ffmpeg、Node.js 22.12+（推荐 24.21.0）；安装器下载并校验固定版本 uv/pnpm；前端构建后运行不需要 Node.js。原任务库自动备份迁移，独立验证产物的 metadata 会导入任务库。环境变量 `VIDEO_INTEL_HOST`、`VIDEO_INTEL_PORT`、`VIDEO_INTEL_BACKEND_PORT` 可覆盖监听配置；`VIDEO_INTEL_MIN_FREE_BYTES` 默认 5GiB，低于阈值拒绝新任务。
 若生成失败，查看任务的 `error` 和 `logs/comfy.log`。服务不会自动降低用户选择的画质或更换模型。
 成功任务的 `metrics` 包含总耗时、GPU 总占用峰值、后端 RSS 峰值和最低可用系统内存。
 GPU 总占用包含桌面及其他程序，RSS 不等于模型文件总大小。
@@ -185,8 +187,8 @@ GPU 总占用包含桌面及其他程序，RSS 不等于模型文件总大小。
 前端开发与检查：
 
 ```bash
-npm --prefix frontend ci --cache "$PWD/cache/npm"
-npm --prefix frontend run build
+./scripts/pnpm.sh install --frozen-lockfile
+./scripts/pnpm.sh build
 .venv/bin/python -m pytest tests -q
 .venv/bin/ruff check video_intel tests scripts
 ```

@@ -1,0 +1,11 @@
+-r requirements-api.in
+-r requirements-comfy.in
+-r requirements-dev.in
+# Preserve the optional legacy UI module's importability.
+gradio==6.27.0
+# Validated H3 runtime; do not upgrade the inference stack implicitly.
+torch==2.10.0+cu130
+torchvision==0.25.0+cu130
+torchaudio==2.10.0+cu130
+transformers==5.17.0
+setuptools==83.0.0

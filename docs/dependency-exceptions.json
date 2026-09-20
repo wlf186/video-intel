@@ -1,0 +1,24 @@
+[
+  {
+    "package": "torch",
+    "version": "2.10.0+cu130",
+    "ids": ["GHSA-rrmf-rvhw-rf47", "PYSEC-2025-194", "CVE-2025-3000"],
+    "review_after": "2026-12-20",
+    "reason": "The service accepts text and decoded images, not Python scripts. H3 uses a server-owned workflow and fixed safetensors checkpoints. No user-controlled source is passed to torch.jit.script. This does not protect local users executing arbitrary Python code.",
+    "evidence": ["video_intel/workflows.py", "video_intel/service.py", "scripts/download_models.py"],
+    "comfyui_commit": "40c4fcdf513a4523e39d54a9d391908af8df8171",
+    "model_revision": "a98869194787969724c7425d95d0ed73ce9202af",
+    "url": "https://github.com/advisories/GHSA-rrmf-rvhw-rf47"
+  },
+  {
+    "package": "torch",
+    "version": "2.10.0+cu130",
+    "ids": ["PYSEC-2026-139", "CVE-2026-4538"],
+    "review_after": "2026-12-20",
+    "reason": "The reported attack loads an attacker-created .pt2 archive. Public submissions cannot provide workflows or checkpoints; all H3 model paths are server-selected safetensors. ComfyUI is bound to loopback and this service is limited to trusted hosts/networks. No claim is made about arbitrary local Torch programs or separately operated ComfyUI nodes.",
+    "evidence": ["video_intel/workflows.py", "video_intel/launch.py", "scripts/download_models.py"],
+    "comfyui_commit": "40c4fcdf513a4523e39d54a9d391908af8df8171",
+    "model_revision": "a98869194787969724c7425d95d0ed73ce9202af",
+    "url": "https://osv.dev/vulnerability/PYSEC-2026-139"
+  }
+]

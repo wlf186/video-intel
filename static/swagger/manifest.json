@@ -1,7 +1,7 @@
 {
   "package": "swagger-ui-dist",
   "version": "5.32.15",
-  "source": "https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.32.15/",
+  "source": "https://registry.npmjs.org/swagger-ui-dist/-/swagger-ui-dist-5.32.15.tgz",
   "files": {
     "swagger-ui-bundle.js": {
       "bytes": 1552209,

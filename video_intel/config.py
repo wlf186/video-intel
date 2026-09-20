@@ -14,7 +14,7 @@ PORT = int(os.environ.get("VIDEO_INTEL_PORT", "20820"))
 BACKEND_PORT = int(os.environ.get("VIDEO_INTEL_BACKEND_PORT", "8188"))
 MIN_FREE_BYTES = int(os.environ.get("VIDEO_INTEL_MIN_FREE_BYTES", str(5 * 1024**3)))
 CHECKPOINT_SECONDS = 60
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 
 
 def runtime_environment():
