@@ -1,0 +1,20 @@
+.venv/
+vendor/
+models/
+data/
+logs/
+run/
+__pycache__/
+.pytest_cache/
+*.pyc
+tmp/
+cache/
+frontend/node_modules/
+frontend/dist/
+frontend/test-results/
+.ruff_cache/
+
+# Local credentials and environment overrides
+.env
+.env.*
+!.env.example
