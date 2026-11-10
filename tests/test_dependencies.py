@@ -157,7 +157,7 @@ def test_lock_check_does_not_mutate_candidate(tmp_path, monkeypatch):
     destination = tmp_path / "requirements.lock"
     destination.write_text(original)
 
-    def compile_candidate(uv, name, sources, output, upgrade):
+    def compile_candidate(uv, name, sources, output, upgrade, upgrade_packages=()):
         assert output.read_text() == original  # Existing versions seed resolution.
         assert not upgrade
         output.write_text("example==2.0\n")
@@ -188,3 +188,20 @@ def test_tool_versions_and_python_locks_agree():
     package = json.loads((bootstrap.ROOT / "frontend/package.json").read_text())
     assert package["packageManager"] == f"pnpm@{bootstrap.VERSIONS['pnpm']}"
     assert full["pip-audit"] == bootstrap.VERSIONS["pip-audit"]
+
+
+@pytest.mark.parametrize("mode", ["--check", "--upgrade"])
+def test_targeted_upgrade_modes_are_exclusive(monkeypatch, mode):
+    monkeypatch.setattr(sys, "argv", ["locks", mode, "--upgrade-package", "filelock==4.2.1"])
+    with pytest.raises(SystemExit) as result:
+        locks.main()
+    assert result.value.code == 2
+
+
+def test_targeted_upgrade_only_passes_requested_packages(tmp_path, monkeypatch):
+    calls = []
+    monkeypatch.setattr(locks.subprocess, "run", lambda command, **kwargs: calls.append(command))
+    locks.compile_lock(Path("uv"), "requirements.lock", ["requirements.in"], tmp_path / "new.lock", False, ["filelock==4.2.1", "msgpack==1.2.3"])
+    assert "--upgrade" not in calls[0]
+    assert calls[0].count("--upgrade-package") == 2
+    assert calls[0][-5:] == ["--upgrade-package", "filelock==4.2.1", "--upgrade-package", "msgpack==1.2.3", "requirements.in"]

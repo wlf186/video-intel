@@ -5,7 +5,7 @@
 
 ## 固定版本与安装
 
-`scripts/toolchain.json` 是工具版本和下载校验值的来源：uv 0.12.5、pnpm 10.34.5、
+`scripts/toolchain.json` 是工具版本和下载校验值的来源：uv 0.13.4、pnpm 10.34.5、
 pip-audit 2.10.1。Python 3.12.14 与 Node 24.21.0 是 CI 验证版本；现有 Python 3.12
 环境可继续使用，Node 最低为 22.12。首次安装需要系统 Python 3.9+（启动安装器）、
 Node、Git、ffmpeg；工具下载到 `.runtime/`，不安装到系统全局。
@@ -37,6 +37,8 @@ Python 安装必须有完整锁文件，使用 `uv pip sync --require-hashes --s
 ```bash
 python3 scripts/lock_dependencies.py
 python3 scripts/lock_dependencies.py --check
+# 仅更新指定依赖，保留无关版本：
+python3 scripts/lock_dependencies.py --upgrade-package filelock==4.2.1
 # 仅在明确更新间接依赖时使用；仍须重新审计与验证：
 python3 scripts/lock_dependencies.py --upgrade
 ```
@@ -63,8 +65,8 @@ API-only 检查仍可使用 `/docs`，无需 Node 或前端构建，所有资源
 报告同时保留安装版本。未知本地版本、被跳过或遗漏的包、查询失败都视为失败。
 前端及工具不得有已知告警。报告默认写到忽略目录 `tmp/dependency-audit.json`。
 
-已修复 Vite 7.1.3 的开发服务器文件读取问题，升级至 7.3.6；setuptools 从 78.1.0
-升级至 83.0.0，修复 PackageIndex 路径穿越和 sdist Unicode 排除规则问题。
+已修复 Vite 的开发服务器问题，升级至 7.3.7，并固定 source-map-js 1.2.2；setuptools
+升级至 84.1.0，修复 PackageIndex 路径穿越和 sdist Unicode 排除规则问题。
 
 `dependency-exceptions.json` 只列当前推理部署边界内不适用的两个 Torch 公告：
 
@@ -83,7 +85,7 @@ ComfyUI 仅监听 loopback。这些依据不适用于不可信本机用户、单
 
 ## 验证、升级与发布
 
-Linux CI 在 PR、main、版本标签、手动触发和每周定时执行：锁校验、上游清单校验、pytest、
+Linux CI 在 PR、main、版本标签、手动触发和每月 1 日 04:43 UTC 执行：锁校验、上游清单校验、pytest、
 Ruff、生产构建、Vite 安全回归、依赖审计与无 GPU 浏览器检查。Actions 固定提交且只读权限。
 浏览器使用隔离 API 数据、端口和目录，覆盖桌面/手机、中英文、导航与离线 Swagger。
 
@@ -98,3 +100,13 @@ Ruff、生产构建、Vite 安全回归、依赖审计与无 GPU 浏览器检查
 依赖或安装方式必须运行真实生成，使用新的 `--manifest` 和 `--reference-image`，避免
 复用旧成功记录；至少覆盖三种预览模式及一条原生分辨率样片。GitHub 发布与本地恢复
 分别报告，失败时不宣称完成，也不靠挪动标签补救。
+
+## 独立安全巡检与本轮升级
+
+`Dependency security audit` 每周一 04:23 UTC 独立运行，也作为 Linux 完整检查的必需作业。backend/browser/security 分别执行，审计失败仍可取得功能与浏览器诊断；`linux` 汇总仅在三者全部成功时通过。发布仍要求同一 SHA 的 main 和标签完整门禁通过。
+
+本地仍使用 `python scripts/audit_dependencies.py`；`--output` 指定完整 JSON 路径，同名 `.md` 为摘要。原有 status/date/python/accepted/rejected/frontend/tools 字段保留，新增分范围结果、UTC、触发类型和 SHA。报告完整锁、CI 锁、uv、前端和 pnpm，别名只在摘要归并。所有范围执行后统一判定；查询错误和未豁免公告均失败，超时/429/5xx 最多尝试三次。CI 始终上传报告并保存 30 天。
+
+本轮退役未接入现用服务的 `video_intel.ui` 旧 Gradio 模块并移除其依赖；React 和 API 继续使用。Pillow 升至 13.0.0。定向更新 aiohttp、certifi、filelock、Mako、msgpack、multidict、setuptools、urllib3 及必要的兼容依赖，uv 升至校验固定的 0.13.4。模型、Torch/CUDA、Transformers、ComfyUI 提交与推理参数保持固定。新建或重新评估的模型例外最多有效 30 天，现有未到期例外沿用原复查日期；API、前端和工具不增加豁免。
+
+`--upgrade-package` 可重复，不能与 `--check` 或 `--upgrade` 同用。依赖输入及 full/CI 锁一起生成和检查；禁止直接改锁绕过冲突。本轮无数据迁移或历史文件重写，不需要额外升级备份。恢复服务及真实生成验收遵循上文维护流程。

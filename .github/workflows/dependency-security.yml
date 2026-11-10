@@ -1,0 +1,52 @@
+name: Dependency security audit
+run-name: Dependency security audit · ${{ github.event_name }} · ${{ github.ref_name
+  }}
+'on':
+  workflow_call: null
+  workflow_dispatch: null
+  schedule:
+  - cron: 23 4 * * 1
+permissions:
+  contents: read
+concurrency:
+  group: audit-${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      UV_CACHE_DIR: ${{ github.workspace }}/cache/uv
+      UV_PYTHON_INSTALL_DIR: ${{ github.workspace }}/.runtime/python
+    steps:
+    - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      with:
+        node-version-file: .node-version
+    - name: Install pinned tools and lightweight test environment
+      run: 'python3 scripts/bootstrap_tools.py all
+
+        .runtime/bin/uv venv --python "$(cat .python-version)" .runtime/ci
+
+        python3 scripts/sync_environment.py --ci --python "$PWD/.runtime/ci/bin/python"
+
+        ./scripts/pnpm.sh install --frozen-lockfile
+
+        '
+    - name: Verify dependency locks and upstream provenance
+      run: "python3 scripts/lock_dependencies.py --check\npython3 - <<'PY'\nimport\
+        \ hashlib, json, urllib.request\nfrom pathlib import Path\ncommit = json.loads(Path('scripts/toolchain.json').read_text())['comfyui_commit']\n\
+        with urllib.request.urlopen(f'https://raw.githubusercontent.com/Comfy-Org/ComfyUI/{commit}/requirements.txt',\
+        \ timeout=30) as response:\n    upstream = response.read()\nsnapshot = Path('requirements-comfy.in').read_bytes().splitlines(keepends=True)\n\
+        assert upstream == b''.join(snapshot[2:]), hashlib.sha256(upstream).hexdigest()\n\
+        PY\n"
+    - name: Audit every locked environment and tool
+      run: .runtime/ci/bin/python scripts/audit_dependencies.py
+    - name: Upload complete security report
+      if: always()
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      with:
+        name: dependency-security-reports
+        path: tmp/dependency-audit.*
+        if-no-files-found: error
+        retention-days: 30

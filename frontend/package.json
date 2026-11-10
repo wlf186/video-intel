@@ -21,7 +21,7 @@
     "@types/react-dom": "19.1.7",
     "prettier": "3.6.2",
     "typescript": "5.9.2",
-    "vite": "7.3.6",
+    "vite": "7.3.7",
     "swagger-ui-dist": "5.32.15"
   },
   "packageManager": "pnpm@10.34.5",
@@ -30,5 +30,10 @@
   },
   "scarfSettings": {
     "enabled": false
+  },
+  "pnpm": {
+    "overrides": {
+      "source-map-js": "1.2.2"
+    }
   }
 }

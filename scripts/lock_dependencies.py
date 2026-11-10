@@ -28,7 +28,7 @@ def validate_comfy_requirements():
         raise ValueError("ComfyUI dependency snapshot revision differs from toolchain")
 
 
-def compile_lock(uv, name, sources, output, upgrade):
+def compile_lock(uv, name, sources, output, upgrade, upgrade_packages=()):
     command = [
         str(uv),
         "pip",
@@ -48,6 +48,8 @@ def compile_lock(uv, name, sources, output, upgrade):
         command += ["--constraint", "requirements.lock"]
     if upgrade:
         command += ["--upgrade"]
+    for package in upgrade_packages:
+        command += ["--upgrade-package", package]
     command += sources
     subprocess.run(
         command,
@@ -61,7 +63,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--upgrade", action="store_true")
+    parser.add_argument("--upgrade-package", action="append", default=[])
     args = parser.parse_args()
+    if args.upgrade_package and (args.check or args.upgrade):
+        parser.error("--upgrade-package cannot be combined with --check or --upgrade")
     if args.check and args.upgrade:
         parser.error("--check and --upgrade cannot be combined")
     validate_comfy_requirements()
@@ -79,7 +84,10 @@ def main():
             elif args.check:
                 failures.append(name)
                 continue
-            compile_lock(uv, name, sources, output, args.upgrade)
+            compile_lock(
+                uv, name, sources, output, args.upgrade,
+                upgrade_packages=args.upgrade_package,
+            )
             if args.check:
                 if destination.read_bytes() != output.read_bytes():
                     failures.append(name)
