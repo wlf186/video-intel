@@ -12,7 +12,7 @@ CACHE = ROOT / "cache"
 LOGS = ROOT / "logs"
 RUN = ROOT / "run"
 CHECKPOINT_SECONDS = 60
-VERSION = "1.0.1"
+VERSION = "1.0.3"
 _settings = None
 
 

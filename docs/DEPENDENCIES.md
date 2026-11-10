@@ -1,5 +1,15 @@
 # 依赖管理与发布
 
+## v1.0.3 升级
+
+从已发布的 v1.0.2 升级：**无数据库迁移、历史文件改写或删除，无需额外升级备份**。先记录监听配置与进程身份，等待任务结束并停止服务；执行 `./scripts/setup.sh --skip-models` 同步锁定环境和前端，再恢复原有运行状态并核验历史任务、媒体和版本。已有模型保持原 revision，不重新下载。更早版本也须覆盖下方相应升级要求。
+
+本版定向修复依赖告警，更新 Pillow 13.0.0、setuptools 84.1.0、Vite 7.3.7 等兼容版本及校验固定的 uv 0.13.4；完整版本见提交的锁文件。退役未接入现有服务入口的旧 `video_intel.ui` Gradio 模块及其依赖，现用 React 页面和 HTTP API 保持兼容。Torch、CUDA、Transformers、ComfyUI 提交、模型和推理参数不变。现有两项模型环境 Torch VEX 继续按各自复查日期管理，不代表组件漏洞已修复。
+
+依赖安全审计每周一 04:23 UTC 独立运行；完整回归每月 1 日 04:43 UTC 运行，原提交、PR、标签和手动门禁继续执行。独立 browser 作业先构建自己的生产资源，避免已有构建产物掩盖干净 runner 的缺失。后端/前端版本及发布标签统一为 1.0.3，并增加标签版本契约，修正旧 v1.0.2 标签仍使用 1.0.1 应用元数据的不一致。
+
+English: From published v1.0.2, no data migration, historical rewrite or additional upgrade backup is required. Stop the recorded instance, synchronize locked dependencies/build assets with setup.sh --skip-models, then restore and verify the original state. The legacy Gradio module is retired; React/API behavior and the validated inference stack remain. Release, frontend and API versions now agree. Earlier upgrades must include their intervening requirements.
+
 支持 Linux x86_64、Python 3.12、CUDA 13.0。当前没有原生 Windows 或 CPU 部署配置。
 生产运行仍使用项目 `.venv`；CI 使用独立的轻量环境，不下载模型或 CUDA wheels。
 
