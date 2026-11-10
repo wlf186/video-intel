@@ -86,6 +86,8 @@ jobs:
         \ timeout=30) as response:\n    upstream = response.read()\nsnapshot = Path('requirements-comfy.in').read_bytes().splitlines(keepends=True)\n\
         assert upstream == b''.join(snapshot[2:]), hashlib.sha256(upstream).hexdigest()\n\
         PY\n"
+    - name: Build frontend for browser smoke
+      run: ./scripts/pnpm.sh build
     - name: Browser smoke without GPU or model downloads
       run: '.runtime/ci/bin/python -m playwright install --with-deps chromium
 

@@ -156,3 +156,19 @@ def test_query_cache_is_per_invocation_and_validates_before_reuse(monkeypatch):
     with pytest.raises(ValueError, match="omitted"):
         audit.collect_python({"torch": "2.11.0+cpu"}, incomplete)
     assert incomplete == {}
+
+
+def test_independent_browser_job_builds_assets_before_smoke():
+    root = Path(__file__).resolve().parents[1]
+    workflow = yaml.safe_load(
+        (root / ".github/workflows/linux.yml").read_text(encoding="utf-8")
+    )
+    browser = workflow["jobs"]["browser"]
+    assert "needs" not in browser
+    commands = [step.get("run", "") for step in browser["steps"]]
+    build = next(i for i, command in enumerate(commands) if "./scripts/pnpm.sh build" in command)
+    smoke = next(i for i, command in enumerate(commands) if "scripts/browser_smoke.py" in command)
+    assert build < smoke
+    build_step = browser["steps"][build]
+    assert "if" not in build_step
+    assert not build_step.get("continue-on-error", False)
